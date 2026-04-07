@@ -3,6 +3,9 @@
 
 cmake_minimum_required(VERSION 3.9.0)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 option(ASAR_GEN_EXE "Build Asar standalone application" ON)
 option(ASAR_GEN_DLL "Build Asar shared library" ON)
 option(ASAR_GEN_LIB "Build Asar static library" ON)
@@ -97,12 +100,6 @@ macro(set_asar_shared_properties target msvc_lib_type_param enable_sanitizer)
 			/wd5045 # compiler will insert Spectre mitigation for memory load if /Qspectre switch specified
 		)
 		target_link_options(${target} PRIVATE /STACK:4194304)
-		if(MSVC_VERSION VERSION_LESS "1900")
-			target_compile_features(${target} PRIVATE cxx_std_11)
-		else()
-			# MSVC throws errors in STL headers when building with MSVC 2017 without C++14...
-			target_compile_features(${target} PRIVATE cxx_std_14)
-		endif()
 	else()
 		target_compile_options(${target} PRIVATE -Wall -pedantic
 			-Wno-varargs # passing an object that undergoes default argument promotion to 'va_start' has undefined behavior
@@ -115,11 +112,6 @@ macro(set_asar_shared_properties target msvc_lib_type_param enable_sanitizer)
 			target_compile_options(${target} PRIVATE -static -static-libgcc -s)
 			target_link_libraries(${target} PRIVATE -static -static-libgcc -s)
 		endif()
-
-		# for some reason this isn't available on MSVC?
-		target_compile_features(${target} PRIVATE c_std_99)
-
-		target_compile_features(${target} PRIVATE cxx_std_11)
 	endif()
 endmacro()
 

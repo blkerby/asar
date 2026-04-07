@@ -108,6 +108,7 @@ int main(int argc, char * argv[])
 	{
 		cmdlparam_none,
 
+		cmdlparam_addipspath,
 		cmdlparam_addincludepath,
 		cmdlparam_adddefine,
 
@@ -139,6 +140,10 @@ int main(int argc, char * argv[])
 			"                   Display version information.\n\n"
 			" -v, --verbose     \n"
 			"                   Enable verbose mode.\n\n"
+			" -h, --header\n"
+			"                   Assume the ROM includes a header.\n\n"
+			" --ips <path>\n"
+			"                   Generate IPS patch.\n\n"
 			" --symbols=<none/wla/nocash>\n"
 			"                   Specifies the format of the symbols output file. (Default is none for no symbols file)\n\n"
 			" --symbols-path=<filename>\n"
@@ -164,12 +169,16 @@ int main(int argc, char * argv[])
 			"                   Disable a specific warning.\n\n"
 			" --error-limit=<N> \n"
 			"                   Stop after encountering this many errors, instead of the default 20\n\n"
+            " --disable-read\n"
+            "                   Treat use of readN functions as errors. Useful for build systems that work without an input ROM\n\n"
 			);
 		ignoretitleerrors=false;
 		string par;
 		bool verbose=libcon_interactive;
+		bool has_header=false;
 		string symbols="";
 		string symfilename="";
+		std::string ips_filepath;
 
 		autoarray<string> includepaths;
 		autoarray<const char*> includepath_cstrs;
@@ -183,6 +192,16 @@ int main(int argc, char * argv[])
 
 			if (par=="--no-title-check") ignoretitleerrors=true;
 			else if (par == "-v" || par=="--verbose") verbose=true;
+			else if (par == "-h" || par=="--header") has_header=true;
+			else if (par == "--disable-read") has_read_disabled=true;
+			else if (par == "--ips")
+			{
+				postprocess_arg = libcon_option_value();
+				if (postprocess_arg != nullptr)
+				{
+					postprocess_param = cmdlparam_addipspath;
+				}
+			}
 			else if (checkstartmatch(par, "--symbols="))
 			{
 				if (par == "--symbols=none") symbols = "";
@@ -285,7 +304,11 @@ int main(int argc, char * argv[])
 			}
 			else libcon_badusage();
 
-			if (postprocess_param == cmdlparam_addincludepath)
+			if (postprocess_param == cmdlparam_addipspath)
+			{
+				ips_filepath = postprocess_arg;
+			}
+			else if (postprocess_param == cmdlparam_addincludepath)
 			{
 				includepaths.append(postprocess_arg);
 			}
@@ -356,7 +379,7 @@ int main(int argc, char * argv[])
 			}
 			fclose(f);
 		}
-		if (!openrom(romname, false))
+		if (!openrom(romname, false, has_header, ips_filepath))
 		{
 			thisfilename= nullptr;
 			asar_throw_error(pass, error_type_null, openromerror);

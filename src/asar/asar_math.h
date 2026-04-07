@@ -20,3 +20,5 @@ extern bool forwardlabel;
 
 extern bool math_pri;
 extern bool math_round;
+
+extern bool has_read_disabled;

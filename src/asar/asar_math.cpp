@@ -33,6 +33,7 @@ static double eval(int depth);
 bool foundlabel;
 bool foundlabel_static;
 bool forwardlabel;
+bool has_read_disabled;
 
 struct cachedfile {
 	string filename;
@@ -361,6 +362,9 @@ double asar_pc_wrapper()
 
 template <int count> double asar_read()
 {
+    if (has_read_disabled)
+        asar_throw_error(2, error_type_block, error_id_disallowed_read);
+    
 	int target = get_double_argument();
 	int addr=snestopc_pick(target);
 	if(has_next_parameter())

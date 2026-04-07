@@ -295,6 +295,8 @@ static asar_error_mapping asar_errors[] =
 
 	{ ERR(broken_for_loop), "Broken for loop declaration." },
 	{ ERR(bad_single_line_for), "Single-line for loop not allowed here." },
+    
+	{ ERR(disallowed_read), "Read function was used in --disable-read mode." },
 
 };
 // RPG Hacker: Sanity check. This makes sure that the element count of asar_warnings
