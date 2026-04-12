@@ -146,12 +146,27 @@ namespace
 
 			intervals.push_back({i_begin, i_end});
 		}
-
-		void save_to_file()
-		{
+        
+        void optimise()
+        {
             std::sort(begin(intervals), end(intervals));
+            Ips ips;
+            for (Interval interval : intervals)
+                ips.queue_for_ips(interval.i_begin, interval.i_end);
+            
+            intervals = std::move(ips).intervals;
+        }
+
+		void save_to_file() const
+		{
 			std::ofstream out(filepath, std::ios::binary);
+            if (!out)
+                throw std::runtime_error("Could not open output IPS file");
+            
 			out.write("PATCH", 5);
+            if (!out)
+                throw std::runtime_error("Failed to write to output IPS file");
+            
 			for (Interval interval : intervals)
 			{
 				size_t n = interval.i_end - interval.i_begin;
@@ -168,6 +183,8 @@ namespace
 					out.put(n_block >> 8);
 					out.put(n_block & 0xFF);
 					out.write(reinterpret_cast<const char*>(romdata) + interval.i_begin, n_block);
+                    if (!out)
+                        throw std::runtime_error("Failed to write to output IPS file");
 
 					interval.i_begin += n_block;
 					n -= n_block;
@@ -175,6 +192,8 @@ namespace
 			}
 
 			out.write("EOF", 3);
+            if (!out)
+                throw std::runtime_error("Failed to write to output IPS file");
 		}
 	};
 
@@ -538,6 +557,7 @@ uint32_t closerom(bool save)
 		fseek(thisfile, header*512, SEEK_SET);
 		fwrite(const_cast<unsigned char*>(romdata), 1, (size_t)romlen, thisfile);
 		
+        ips.optimise();
 		ips.save_to_file();
 
 		// do a quick re-read of the header, and include that in the crc32 calculation if necessary
