@@ -160,6 +160,9 @@ namespace
 
 		void save_to_file() const
 		{
+            if (filepath.empty())
+                return;
+            
 			std::ofstream out(filepath, std::ios::binary);
             if (!out)
                 throw std::runtime_error("Could not open output IPS file");
