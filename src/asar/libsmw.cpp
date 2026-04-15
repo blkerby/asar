@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <fstream>
+#include <tuple>
 #include <vector>
 
 mapper_t mapper=lorom;
