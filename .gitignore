@@ -35,6 +35,9 @@
 *.smc
 *.sfc
 
+# Build directory
+build
+
 # Visual Studio build files and CMAKE build files on Windows
 asar/
 src/asar/res/windows/asar_lib.aps
